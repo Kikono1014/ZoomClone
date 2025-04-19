@@ -1,0 +1,45 @@
+
+
+<div>
+    <button id="startStream">Start Streaming</button>
+    <button id="stopStream" disabled>Stop Streaming</button>
+</div>
+
+<h2>Preview</h2>
+<video id="localVideo" autoplay playsinline></video>
+<h2>Live Stream</h2>
+<img id="remoteVideo" alt="Remote Stream" />
+
+<script src="~/lib/signalr/signalr.js"></script>
+<script>
+    const video = document.getElementById('localVideo');
+    const img = document.getElementById('remoteVideo');
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/videoHub")
+        .build();
+
+    connection.on("ReceiveFrame", base64Image => {
+        img.src = base64Image;
+    });
+
+
+    function start() {}
+
+    connection.start().then(() => {
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+
+                setInterval(() => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+                    connection.invoke("SendFrame", dataUrl);
+                }, 10); 
+            });
+    });
+</script>
