@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "1iIKpXoCBKA=",
+  "success": true,
+  "projectFilePath": "/home/kikono/univer/sem 4/ООКП/labs/Lab7/ZoomClone/ZoomClone.csproj",
+  "expectedPackageFiles": [
+    "/home/kikono/.nuget/packages/microsoft.aspnetcore.app.ref/9.0.3/microsoft.aspnetcore.app.ref.9.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
