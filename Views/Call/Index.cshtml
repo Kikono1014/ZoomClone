@@ -1,7 +1,8 @@
 <p id="CallId" hidden>@ViewBag.CallId</p>
 
 <div>
-    <button id="toggleVideo" data-state="closed">Start video</button>
+    <button id="toggleVideo" class="btn btn-info" data-state="closed">Start video</button>
+    <button id="toggleShare" class="btn btn-info" data-state="closed">Start sharing</button>
 </div>
 
 <video id="localVideo" autoplay playsinline hidden></video>
@@ -12,3 +13,5 @@
 
 <script src="~/lib/signalr/signalr.js"></script>
 <script src="~/js/call.js"></script>
+<script src="~/js/video.js"></script>
+<script src="~/js/screenshare.js"></script>

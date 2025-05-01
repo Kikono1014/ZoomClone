@@ -6,5 +6,5 @@ namespace ZoomClone.Hubs;
 
 public class AudioHub : Hub
 {
-    
+  
 }

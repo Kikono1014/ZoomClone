@@ -32,7 +32,10 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 
-app.MapHub<VideoHub>("/videoHub");
+app.MapHub<VideoHub>("/videoHub", options =>
+{
+    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
+});
 app.MapHub<AudioHub>("/audioHub");
 
 app.Run();
