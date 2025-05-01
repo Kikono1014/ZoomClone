@@ -1,77 +1,14 @@
-
+<p id="CallId" hidden>@ViewBag.CallId</p>
 
 <div>
-    <button id="startStream" onclick="startStream()">Start Streaming</button>
-    <button id="stopStream" onclick="stopStream()" disabled>Stop Streaming</button>
+    <button id="toggleVideo" data-state="closed">Start video</button>
 </div>
 
-<h2>Preview</h2>
-<video id="localVideo" autoplay playsinline></video>
-<h2>Live Stream</h2>
-<img id="remoteVideo" alt="Remote Stream" />
+<video id="localVideo" autoplay playsinline hidden></video>
+
+<img id="userSample" alt="Remote Stream" style="display: none;"/>
+<div id="users">
+</div>
 
 <script src="~/lib/signalr/signalr.js"></script>
-<script>
-    const video = document.getElementById('localVideo');
-    const img = document.getElementById('remoteVideo');
-
-    const startBtn = document.getElementById('startStream');
-    const stopBtn  = document.getElementById('stopStream');
-
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/videoHub")
-        .build();
-
-
-    connection.on("ReceiveFrame", base64Image => {
-        img.src = base64Image;
-    });
-
-
-    let captureIntervalId = null;
-    let localStream = null;
-
-    
-
-    async function startStream() {
-        await connection.start();
-
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = localStream;
-        
-        const canvas  = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        captureIntervalId = setInterval(() => {
-            canvas.width  = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.5)
-            
-            connection.invoke("SendFrame", dataUrl)
-                        .catch(err => console.error(err));
-            }, 10);
-
-        startBtn.disabled = true;
-        stopBtn.disabled  = false;
-    }
-    startStream();
-
-    function stopStream() {
-        if (captureIntervalId) {
-            clearInterval(captureIntervalId);
-            captureIntervalId = null;
-        }
-
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-            video.srcObject = null;
-            localStream = null;
-        }
-
-        connection.stop().catch(err => console.error('SignalR stop error:', err));
-        img.src = "";
-        startBtn.disabled = false;
-        stopBtn.disabled  = true;
-    }
-
-</script>
+<script src="~/js/call.js"></script>

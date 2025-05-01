@@ -1,10 +1,13 @@
 using ZoomClone.Hubs;
+using ZoomClone.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
+
+builder.Services.AddSingleton<List<Call>>();
 
 var app = builder.Build();
 
@@ -30,5 +33,6 @@ app.MapControllerRoute(
 
 
 app.MapHub<VideoHub>("/videoHub");
+app.MapHub<AudioHub>("/audioHub");
 
 app.Run();
