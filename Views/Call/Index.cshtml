@@ -1,17 +1,18 @@
-<p id="CallId" hidden>@ViewBag.CallId</p>
-
-<div>
-    <button id="toggleVideo" class="btn btn-info" data-state="closed">Start video</button>
-    <button id="toggleShare" class="btn btn-info" data-state="closed">Start sharing</button>
+<h1>Group Video Chat</h1>
+<div id="controls">
+    <input type="text" id="roomInput" placeholder="Room name" />
+    <button id="joinBtn">Join Room</button>
 </div>
-
-<video id="localVideo" autoplay playsinline hidden></video>
-
-<img id="userSample" alt="Remote Stream" style="display: none;"/>
-<div id="users">
+<button id="toggle-mic">Toggle Microphone</button>
+<button id="toggle-camera">Toggle Camera</button>
+<button id="share-screen">Share Screen</button>
+<div id="localContainer" class="media-container">
+    <video id="localVideo" autoplay muted playsinline></video>
+    <canvas id="placeholderCanvas" width="300" height="225" style="display:none;"></canvas>
+    <img id="placeholderImg" src="~/favicon.ico" style="display:none;" />
 </div>
+<div id="remoteVideos"></div>
 
-<script src="~/lib/signalr/signalr.js"></script>
+<!-- SignalR client library (from CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
 <script src="~/js/call.js"></script>
-<script src="~/js/video.js"></script>
-<script src="~/js/screenshare.js"></script>
