@@ -4,10 +4,20 @@ using ZoomClone.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 
 builder.Services.AddSingleton<List<Call>>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowAnyOrigin());
+});
+
 
 var app = builder.Build();
 
@@ -23,14 +33,15 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
 
+app.UseCors("AllowAll");
 app.MapStaticAssets();
-// app.si();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
+app.UseStaticFiles();
+app.MapControllers();
 
 app.MapHub<CallHub>("/callHub", options =>
 {
