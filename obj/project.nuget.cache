@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "EKinJCPhXdc=",
+  "dgSpecHash": "2S8XLbOMCAQ=",
   "success": true,
   "projectFilePath": "/home/kikono/univer/sem 4/ООКП/labs/Lab7/ZoomClone/ZoomClone.csproj",
   "expectedPackageFiles": [
@@ -45,7 +45,7 @@
     "/home/kikono/.nuget/packages/system.reflection.emit/4.7.0/system.reflection.emit.4.7.0.nupkg.sha512",
     "/home/kikono/.nuget/packages/system.text.encodings.web/8.0.0/system.text.encodings.web.8.0.0.nupkg.sha512",
     "/home/kikono/.nuget/packages/system.threading.channels/8.0.0/system.threading.channels.8.0.0.nupkg.sha512",
-    "/home/kikono/.nuget/packages/microsoft.aspnetcore.app.ref/9.0.3/microsoft.aspnetcore.app.ref.9.0.3.nupkg.sha512"
+    "/home/kikono/.nuget/packages/microsoft.aspnetcore.app.ref/9.0.4/microsoft.aspnetcore.app.ref.9.0.4.nupkg.sha512"
   ],
   "logs": []
 }
