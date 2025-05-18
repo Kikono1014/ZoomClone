@@ -1,0 +1,10 @@
+<h1>Group Video Chat</h1>
+@* <div id="controls">
+    <input type="text" id="roomInput" placeholder="Room name"/>
+    <button id="joinBtn">Join Room</button>
+</div> *@
+
+<form asp-controller="Call" asp-action="JoinPost" method="post">
+    <input type="text" name="RoomId" placeholder="Room name"/>   
+    <button type="submit">Join Room</button>
+</form>
