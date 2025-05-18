@@ -24,16 +24,49 @@ micBtn.onclick = () => {
 const camBtn = document.getElementById('toggle-camera');
 camBtn.onclick = () => {
   const videoTrack = localStream.getVideoTracks()[0];
-  if (videoTrack && videoTrack.enabled) {
-    // If camera currently on, turn off and send placeholder
-    videoTrack.enabled = false;
-    sendPlaceholderToPeers();
+  videoTrack.enabled = !videoTrack.enabled;
+  if (videoTrack.enabled) {
+    restoreCameraToPeers()
   } else {
-    // If camera off or placeholder, restore actual camera
-    videoTrack.enabled = true;
-    restoreCameraToPeers();
+    sendPlaceholderToPeers();
   }
 };
+
+function createPlaceholderStream() {
+  const canvas = document.getElementById('placeholderCanvas');
+  const img    = document.getElementById('placeholderImg');
+  const ctx    = canvas.getContext('2d');
+
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  return canvas.captureStream(); 
+}
+
+async function sendPlaceholderToPeers() {
+  const placeholderStream = createPlaceholderStream();
+  const placeholderTrack  = placeholderStream.getVideoTracks()[0];
+
+  Object.values(peerConnections).forEach(async pc => {
+    const videoSender = pc.getSenders()
+                         .find(s => s.track && s.track.kind === 'video');
+    if (videoSender) {
+      await videoSender.replaceTrack(placeholderTrack);
+    }
+  });
+}
+
+async function restoreCameraToPeers() {
+  const cameraTrack  = localStream.getVideoTracks()[0];
+
+  Object.values(peerConnections).forEach(async pc => {
+    const videoSender = pc.getSenders()
+                         .find(s => s.track && s.track.kind === 'video');
+    if (videoSender) {
+      await videoSender.replaceTrack(cameraTrack);
+    }
+  });
+
+}
 
 
 
@@ -77,58 +110,6 @@ document.getElementById('share-screen').onclick = async () => {
 
 
 
-function createPlaceholderStream() {
-  const canvas = document.getElementById('placeholderCanvas');
-  const img    = document.getElementById('placeholderImg');
-  const ctx    = canvas.getContext('2d');
-
-  // Draw the image once (it will persist)
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-  // Capture a MediaStream from the canvas at 1 fps (default)
-  return canvas.captureStream();  // uses HTMLCanvasElement.captureStream() :contentReference[oaicite:0]{index=0}
-}
-
-async function sendPlaceholderToPeers() {
-  const placeholderStream = createPlaceholderStream();
-  const placeholderTrack  = placeholderStream.getVideoTracks()[0];
-
-  // For each RTCPeerConnection, replace the outgoing video track
-  Object.values(peerConnections).forEach(async pc => {
-    const videoSender = pc.getSenders()
-                         .find(s => s.track && s.track.kind === 'video');
-    if (videoSender) {
-      // Swap in the placeholder track without renegotiation :contentReference[oaicite:2]{index=2}
-      await videoSender.replaceTrack(placeholderTrack);
-    }
-  });
-
-  // Also update your local <video> element so you see the placeholder
-  localVideo.srcObject = placeholderStream;
-  localStream = placeholderStream;  // update reference if needed
-}
-
-async function restoreCameraToPeers() {
-  // Get real camera + mic again
-  const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-  const cameraTrack  = cameraStream.getVideoTracks()[0];
-
-  // Swap back on each peer connection
-  Object.values(peerConnections).forEach(async pc => {
-    const videoSender = pc.getSenders()
-                         .find(s => s.track && s.track.kind === 'video');
-    if (videoSender) {
-      await videoSender.replaceTrack(cameraTrack);
-    }
-  });
-
-  // Update local preview
-  localVideo.srcObject = cameraStream;
-  localStream = cameraStream;
-}
-
-
-
 
 
 
@@ -137,9 +118,12 @@ async function initLocalStream() {
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         localVideo.srcObject = localStream;
+        // const videoTrack = localStream.getVideoTracks()[0];
+        // videoTrack.enabled = false;
+        // sendPlaceholderToPeers();
     } catch (err) {
-        console.error("Error accessing media devices.", err);
-        alert("Could not access camera/microphone: " + err);
+      console.error("Error accessing media devices.", err);
+      alert("Could not access camera/microphone: " + err);
     }
 }
 

@@ -1,3 +1,5 @@
+<link rel="stylesheet" type="text/css" href="~/css/call.css">
+
 <h1>Group Video Chat</h1>
 <div id="controls">
     <input type="text" id="roomInput" placeholder="Room name" />
@@ -7,9 +9,9 @@
 <button id="toggle-camera">Toggle Camera</button>
 <button id="share-screen">Share Screen</button>
 <div id="localContainer" class="media-container">
-    <video id="localVideo" autoplay muted playsinline></video>
-    <canvas id="placeholderCanvas" width="300" height="225" style="display:none;"></canvas>
-    <img id="placeholderImg" src="~/favicon.ico" style="display:none;" />
+    <video id="localVideo" autoplay muted playsinline hidden></video>
+    <canvas id="placeholderCanvas" width="300" height="225" style="display:none;"  hidden></canvas>
+    <img id="placeholderImg" src="~/favicon.ico" style="display:none;"  hidden/>
 </div>
 <div id="remoteVideos"></div>
 
