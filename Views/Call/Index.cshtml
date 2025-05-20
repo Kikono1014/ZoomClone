@@ -2,11 +2,13 @@
 
 <input id="roomId_" value="@ViewBag.RoomId" hidden />
 <input id="username_" value="@ViewBag.Username" hidden />
+<input id="muteAudio_" value="@ViewBag.MuteAudio" hidden />
+<input id="muteVideo_" value="@ViewBag.MuteVideo" hidden />
 
 
-<button id="toggle-mic">Toggle Microphone</button>
-<button id="toggle-camera">Toggle Camera</button>
-<button id="share-screen">Share Screen</button>
+<button class="btn btn-danger rounded" id="toggle-mic">Toggle Microphone</button>
+<button class="btn btn-danger rounded"  id="toggle-camera">Toggle Camera</button>
+<button class="btn btn-danger rounded"  id="share-screen">Share Screen</button>
 <div id="localContainer" class="media-container">
     <video id="localVideo" autoplay muted playsinline hidden></video>
     <canvas id="placeholderCanvas" width="300" height="225" style="display:none;"  hidden></canvas>
@@ -15,8 +17,8 @@
 <div id="remoteVideos"></div>
 
 <div id="recordControls" style="margin-top: 1rem;">
-    <button id="startRecordingBtn" disabled>Start Recording</button>
-    <button id="stopRecordingBtn" disabled>Stop Recording</button>
+    <button class="btn btn-primary rounded" id="startRecordingBtn" disabled>Start Recording</button>
+    <button class="btn btn-primary rounded" id="stopRecordingBtn" disabled>Stop Recording</button>
 </div>
 
 <!-- SignalR client library (from CDN) -->

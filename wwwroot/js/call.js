@@ -1,6 +1,8 @@
 
 const roomId = document.getElementById("roomId_").value.trim();
 const username = document.getElementById("username_").value.trim();
+const muteAudio = document.getElementById("muteAudio_").value.trim();
+const muteVideo = document.getElementById("muteVideo_").value.trim();
 
 
 const localVideo = document.getElementById("localVideo");
@@ -21,6 +23,13 @@ const micBtn = document.getElementById('toggle-mic');
 micBtn.onclick = () => {
   const audioTrack = localStream.getAudioTracks()[0];
   audioTrack.enabled = !audioTrack.enabled;
+  if (audioTrack.enabled) {
+    micBtn.classList.remove("btn-danger");
+    micBtn.classList.add("btn-primary");
+  } else  {
+    micBtn.classList.remove("btn-primary");
+    micBtn.classList.add("btn-danger");
+  }
 };
 
 const camBtn = document.getElementById('toggle-camera');
@@ -28,9 +37,13 @@ camBtn.onclick = () => {
   const videoTrack = localStream.getVideoTracks()[0];
   videoTrack.enabled = !videoTrack.enabled;
   if (videoTrack.enabled) {
-    restoreCameraToPeers()
+    restoreCameraToPeers();
+    camBtn.classList.remove("btn-danger");
+    camBtn.classList.add("btn-primary");
   } else {
     sendPlaceholderToPeers();
+    camBtn.classList.remove("btn-primary");
+    camBtn.classList.add("btn-danger");
   }
 };
 
@@ -71,8 +84,9 @@ async function restoreCameraToPeers() {
 }
 
 
+const shrbtn = document.getElementById('share-screen');
 
-document.getElementById('share-screen').onclick = async () => {
+shrbtn.onclick = async () => {
   try {
     // Get screen media stream
     const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
@@ -89,6 +103,12 @@ document.getElementById('share-screen').onclick = async () => {
     // Replace video track in local video element
     const localVideo = document.getElementById('localVideo');
     localVideo.srcObject = screenStream;
+    shrbtn.classList.remove("btn-danger");
+    shrbtn.classList.add("btn-primary");
+
+
+    camBtn.classList.remove("btn-primary");
+    camBtn.classList.add("btn-danger");
 
     // Stop sharing when user ends screen share
     screenTrack.onended = async () => {
@@ -105,10 +125,17 @@ document.getElementById('share-screen').onclick = async () => {
       localStream = cameraStream;
       localStream = addUsername(localStream, username);
       localVideo.srcObject = localStream;
+
+      shrbtn.classList.remove("btn-primary");
+      shrbtn.classList.add("btn-danger");
+      
+      camBtn.classList.remove("btn-danger");
+      camBtn.classList.add("btn-primary");
     };
   } catch (err) {
     console.error('Error sharing screen:', err);
   }
+
 };
 
 
@@ -364,4 +391,13 @@ function handleUserLeft(peerId) {
     otherPeers.forEach(peerId => {
         createOffer(peerId);
     });
+
+    if (muteAudio !== "on") {
+      micBtn.click();
+    }
+
+    if (muteVideo !== "on") {
+      camBtn.click();
+    }
+
 })();
