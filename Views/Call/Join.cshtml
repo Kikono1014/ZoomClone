@@ -1,10 +1,12 @@
-<h1>Group Video Chat</h1>
-@* <div id="controls">
-    <input type="text" id="roomInput" placeholder="Room name"/>
-    <button id="joinBtn">Join Room</button>
-</div> *@
+<div class="text-center">
+    <h1 class="display-4">Join Video Chat</h1>
+    @using (Html.BeginForm("JoinPost", "Call", FormMethod.Post))
+    {   
+        <p>@Html.TextBox("RoomId", "", new { placeholder = "Room name" })</p>
+        <p>@Html.TextBox("Username", "", new { placeholder = "Username" })</p>
+        <p>Audio: <input type="checkbox" name="MuteAudio"/></p>
+        <p>Video: <input type="checkbox" name="MuteVideo"/></p>
 
-<form asp-controller="Call" asp-action="JoinPost" method="post">
-    <input type="text" name="RoomId" placeholder="Room name"/>   
-    <button type="submit">Join Room</button>
-</form>
+        <p><input class="btn btn-primary rounded" type="submit" value="Join Room"/></p>
+    }
+</div>

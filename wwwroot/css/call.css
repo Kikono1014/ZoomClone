@@ -1,5 +1,7 @@
 #remoteVideos video {
   width: 25%;
-  /* height: 25;  */
   aspect-ratio: 1 / 1;
+}
+#remoteVideos videoDiv {
+  width: 25%;
 }

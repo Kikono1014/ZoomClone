@@ -8,7 +8,7 @@ builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 
-builder.Services.AddSingleton<List<Call>>();
+builder.Services.AddSingleton<List<Room>>();
 
 builder.Services.AddCors(options =>
 {

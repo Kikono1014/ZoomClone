@@ -4,16 +4,21 @@ using ZoomClone.Models;
 
 namespace ZoomClone.Controllers;
 
-public class CallController(List<Call> calls, ILogger<HomeController> logger) : Controller
+public class CallController(List<Room> rooms, ILogger<HomeController> logger) : Controller
 {
     private readonly ILogger<HomeController> _logger = logger;
-    private readonly List<Call> _calls = calls;
+    private readonly List<Room> _rooms = rooms;
 
-    public IActionResult Index(string? id)
+    public IActionResult Index(string? id, string? username)
     {
         if (id == null) return BadRequest();
 
-        ViewData["roomId"] = id;
+        Room? room = _rooms.FirstOrDefault(i => i.RoomId == id);
+        if (room is null)
+            _rooms.Add(new Room() { RoomId = id });
+
+        ViewData["RoomId"] = id;
+        ViewData["Username"] = username;
         return View();
     }
     
@@ -25,6 +30,6 @@ public class CallController(List<Call> calls, ILogger<HomeController> logger) : 
     [HttpPost]
     public IActionResult JoinPost(IFormCollection form)
     {
-        return RedirectToAction("Index", new { id = form["RoomId"] });
+        return RedirectToAction("Index", new { id = form["RoomId"], username = form["Username"] });
     }
 }

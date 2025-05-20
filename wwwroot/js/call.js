@@ -1,5 +1,8 @@
 
-const roomId = document.getElementById("roomId");
+const roomId = document.getElementById("roomId_").value.trim();
+const username = document.getElementById("username_").value.trim();
+
+
 const localVideo = document.getElementById("localVideo");
 const remoteVideos = document.getElementById("remoteVideos");
 
@@ -99,8 +102,9 @@ document.getElementById('share-screen').onclick = async () => {
         }
       }
 
-      localVideo.srcObject = cameraStream;
-      localStream = cameraStream; // update your local stream reference
+      localStream = cameraStream;
+      localStream = addUsername(localStream, username);
+      localVideo.srcObject = localStream;
     };
   } catch (err) {
     console.error('Error sharing screen:', err);
@@ -117,6 +121,8 @@ async function initLocalStream() {
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         localVideo.srcObject = localStream;
+        // localVideo.srcObject = addUsername(localStream, username);
+        
     } catch (err) {
       console.error("Error accessing media devices.", err);
       alert("Could not access camera/microphone: " + err);
@@ -130,6 +136,17 @@ function createRemoteVideo(peerId) {
     video.autoplay = true;
     video.playsInline = true;
     video.className = "remote";
+
+    // const title = document.createElement("p");
+    // title.textContent = peerId;
+    // title.style.fontSize = 10;
+    
+    // const div = document.createElement("div");
+    // // div.id = "remote_" + peerId;
+    // div.style.display = "inline-block";
+    // video.className = "videoDiv";
+    // div.appendChild(video);
+    // div.appendChild(title);
     remoteVideos.appendChild(video);
     return video;
 }
@@ -141,6 +158,79 @@ function removeRemoteVideo(peerId) {
         video.srcObject = null;
         remoteVideos.removeChild(video);
     }
+}
+
+
+function addUsername(stream, username) {
+  // 1. Create a hidden video element to play the input stream.
+  const video = document.createElement("video");
+  video.srcObject = stream;
+  // Ensure the video can autoplay (muted) to avoid browser blocks on autoplay.
+  video.muted = true;
+  video.playsInline = true;
+  video.autoplay = true;
+  video.style.display = "none";
+  document.body.appendChild(video);
+
+  // 2. Once the video is ready, create a canvas of matching dimensions.
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  // We need to wait until the video metadata loads so dimensions are known.
+  video.addEventListener("loadedmetadata", () => {
+    // Set canvas width/height same as video resolution.
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // 3. Start the drawing loop: draw video frame + overlay text.
+    function draw() {
+      // Draw the current video frame onto the canvas.
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Configure text style for the username overlay.
+      const fontSize = Math.floor(canvas.height * 0.1); // e.g., 4% of height
+      ctx.font = `${fontSize}px sans-serif`;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)"; // White text, slightly translucent
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.6)";    // Black outline for contrast
+      ctx.lineWidth = 2;
+      ctx.textBaseline = "top";
+      ctx.textAlign = "left";
+
+      // Calculate position: 10px from top-left (or adjust as needed)
+      const x = 10;
+      const y = 10;
+
+      // Draw outline first (strokeText) for readability against video backgrounds.
+      ctx.strokeText(username, x, y);
+      // Fill the text on top.
+      ctx.fillText(username, x, y);
+
+      // Schedule next frame draw.
+      requestAnimationFrame(draw);
+    }
+
+    // Kick off the loop.
+    requestAnimationFrame(draw);
+  });
+
+  // 4. Capture the canvas as a new MediaStream at 30fps (adjust if needed).
+  //    Note: captureStream() only functions after the canvas is attached (but
+  //    we can capture immediately here, since the drawing loop starts on 'loadedmetadata').
+  const modifiedStream = canvas.captureStream(30);
+
+  // If the original stream had audio, preserve it by adding its tracks to modifiedStream.
+  stream.getAudioTracks().forEach((track) => {
+    modifiedStream.addTrack(track);
+  });
+
+  // Clean-up: once the page unloads, stop video and canvas if desired.
+  window.addEventListener("beforeunload", () => {
+    video.pause();
+    video.srcObject = null;
+    canvas.width = canvas.height = 0;
+  });
+
+  return modifiedStream;
 }
 
 // Handle incoming offer: create RTCPeerConnection, set remote desc, send answer
@@ -162,8 +252,9 @@ async function handleReceiveOffer(peerId, offer) {
     // When remote track arrives, show it in a video element
     pc.ontrack = event => {
         const remoteVideo = document.getElementById("remote_" + peerId) || createRemoteVideo(peerId);
-        // The event.streams[0] contains the remote MediaStream
         remoteVideo.srcObject = event.streams[0];
+        connection.invoke("SendUsername", roomId, peerId);
+        
     };
 
     await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer)));
@@ -208,6 +299,7 @@ async function createOffer(peerId) {
     pc.ontrack = event => {
         const remoteVideo = document.getElementById("remote_" + peerId) || createRemoteVideo(peerId);
         remoteVideo.srcObject = event.streams[0];
+        connection.invoke("SendUsername", roomId, peerId);  
     };
 
     const offer = await pc.createOffer();
@@ -228,8 +320,7 @@ function handleUserLeft(peerId) {
 }
 
 (async () => {
-    const roomName = roomId.value.trim();
-    if (!roomName) {
+    if (!roomId) {
         alert("Enter a room name.");
         return;
     }
@@ -256,12 +347,17 @@ function handleUserLeft(peerId) {
     connection.on("UserLeft", (peerId) => {
         handleUserLeft(peerId);
     });
+    connection.on("ReceiveUsername", (username, peerId) => {
+        const remoteVideo = document.getElementById("remote_" + peerId);
+        const stream = remoteVideo.srcObject;
+        remoteVideo.srcObject = addUsername(stream, username);
+    });
 
     await connection.start();
     console.log("SignalR connected, ID:", connection.connectionId);
 
     // Join the specified room; get list of other peers already in room
-    const otherPeers = await connection.invoke("JoinRoom", roomName);
+    const otherPeers = await connection.invoke("JoinRoom", roomId, username);
     console.log("Other peers in room:", otherPeers);
 
     // Create an offer for each existing peer

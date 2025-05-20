@@ -3,68 +3,72 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ZoomClone.Models;
 
 namespace ZoomClone.Hubs;
 
-public class CallHub : Hub
+public class CallHub(List<Room> rooms) : Hub
 {
-    // In-memory storage of room membership (for demo purposes)
-    // Key = room name, Value = list of connection IDs in that room.
-    private static readonly ConcurrentDictionary<string, List<string>> Rooms
-        = new ConcurrentDictionary<string, List<string>>();
+    private readonly List<Room> _rooms = rooms;
+    
     private static readonly object _lock = new object();
 
-    // Called by client to join a room. Returns existing peer IDs in the room.
-    public async Task<string[]> JoinRoom(string roomName)
+    
+    public async Task<string[]> JoinRoom(string roomName, string username)
     {
         string connectionId = Context.ConnectionId;
         string[] others;
 
         lock (_lock)
         {
-            if (!Rooms.ContainsKey(roomName))
-                Rooms[roomName] = new List<string>();
-            var list = Rooms[roomName];
-            others = list.ToArray();  // IDs of peers already in room
-            list.Add(connectionId);
+            Room? room = _rooms.FirstOrDefault(i => i.RoomId == roomName);
+            room ??= new Room() { RoomId = roomName, Users = [] };
+            
+            var list = room.Users.Select(i => i.ConnectionId).ToList();
+            others = [.. list];
+            room.Users.Add(new User() { Username = username, ConnectionId = connectionId });
         }
 
         await Groups.AddToGroupAsync(connectionId, roomName);
         return others;
     }
 
-    // Client sends SDP offer to a specific peer
     public async Task SendOffer(string toConnectionId, string fromConnectionId, string offer)
     {
         await Clients.Client(toConnectionId).SendAsync("ReceiveOffer", fromConnectionId, offer);
     }
 
-    // Client sends SDP answer to a specific peer
     public async Task SendAnswer(string toConnectionId, string fromConnectionId, string answer)
     {
         await Clients.Client(toConnectionId).SendAsync("ReceiveAnswer", fromConnectionId, answer);
     }
 
-    // Client sends ICE candidate to a specific peer
     public async Task SendIceCandidate(string toConnectionId, string fromConnectionId, string candidate)
     {
         await Clients.Client(toConnectionId).SendAsync("ReceiveIceCandidate", fromConnectionId, candidate);
     }
 
-    // Clean up when a user disconnects
+
+    public async Task SendUsername(string roomId, string connectionId)
+    {
+        string username = _rooms.First(i => i.RoomId == roomId)
+                                .Users
+                                .First(i => i.ConnectionId == connectionId).Username;
+        await Clients.Caller.SendAsync("ReceiveUsername", username, connectionId);
+    }
+
     public override async Task OnDisconnectedAsync(System.Exception? exception)
     {
         string connectionId = Context.ConnectionId;
-        string? leftRoom = null;
+        Room? leftRoom = null;
 
-        // Remove this connection from whichever room it was in
         lock (_lock)
         {
-            foreach (var kvp in Rooms)
+            foreach (var room in _rooms)
             {
-                if (kvp.Value.Remove(connectionId))
+                if (room.Users.Remove(room.Users.First(i => i.ConnectionId == connectionId)))
                 {
-                    leftRoom = kvp.Key;
+                    leftRoom = room;
                     break;
                 }
             }
@@ -72,8 +76,11 @@ public class CallHub : Hub
 
         if (leftRoom != null)
         {
-            // Notify other members in the room that this user left
-            await Clients.Group(leftRoom).SendAsync("UserLeft", connectionId);
+            await Clients.Group(leftRoom.RoomId).SendAsync("UserLeft", connectionId);
+            if (leftRoom.Users.Count == 0)
+            {
+                _rooms.Remove(leftRoom);
+            }
         }
 
         await base.OnDisconnectedAsync(exception);

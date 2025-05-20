@@ -1,7 +1,7 @@
 namespace ZoomClone.Models;
 
-public class Call
+public class Room
 {
-    public string CallId { get; set; } = "";
+    public string RoomId { get; set; } = "";
     public List<User> Users { get; set; } = [];
 }
