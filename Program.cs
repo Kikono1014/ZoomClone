@@ -48,6 +48,4 @@ app.MapHub<CallHub>("/callHub", options =>
     options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
 });
 
-app.MapHub<ChatHub>("/chatHub");
-
 app.Run();
