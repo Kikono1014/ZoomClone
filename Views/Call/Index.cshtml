@@ -21,6 +21,28 @@
     <button class="btn btn-primary rounded" id="stopRecordingBtn" disabled>Stop Recording</button>
 </div>
 
+<button class="btn btn-info rounded" type="button" onclick="copyLink(event)">Share</button>
+
+@{
+    var link = $"{Context.Request.Scheme}://{Context.Request.Host}"
+    + Url.Action("Join", "Call", new { id = ViewBag.RoomId });
+}
+
+<script>
+  function copyLink(event) {
+    event.preventDefault();
+    const link = '@link';
+
+    navigator.clipboard.writeText(link)
+      .then(() => {
+        alert('Link copied to clipboard!');
+      })
+      .catch(err => {
+        console.error('Failed to copy: ', err);
+      });
+  }
+</script>
+
 <!-- SignalR client library (from CDN) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
 <script src="~/js/call.js"></script>

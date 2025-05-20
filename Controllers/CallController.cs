@@ -21,12 +21,14 @@ public class CallController(List<Room> rooms, ILogger<HomeController> logger) : 
         ViewData["Username"] = username;
         ViewData["MuteAudio"] = muteAudio;
         ViewData["MuteVideo"] = muteVideo;
-        
+
+        // ViewData[""] = $"{Request.Scheme}://{Request.Host}{Request.Path}";
         return View();
     }
     
-    public IActionResult Join()
+    public IActionResult Join(string? id)
     {
+        ViewData["RoomId"] = id;
         return View();
     }
 

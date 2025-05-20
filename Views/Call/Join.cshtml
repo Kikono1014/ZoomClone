@@ -2,7 +2,7 @@
     <h1 class="display-4">Join Video Chat</h1>
     @using (Html.BeginForm("JoinPost", "Call", FormMethod.Post))
     {   
-        <p>@Html.TextBox("RoomId", "", new { placeholder = "Room name" })</p>
+        <p>@Html.TextBox("RoomId", (string)ViewBag.RoomId, new { placeholder = "Room name" })</p>
         <p>@Html.TextBox("Username", "", new { placeholder = "Username" })</p>
         <p>Audio: <input type="checkbox" name="MuteAudio"/></p>
         <p>Video: <input type="checkbox" name="MuteVideo"/></p>
