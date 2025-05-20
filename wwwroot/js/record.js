@@ -161,6 +161,7 @@
             }
             const json = await resp.json();
             console.log("Server saved video to:", json.path);
+            window.open("/" + json.path, '_blank');
             console.log("Video successfully recorded on server:\n" + json.path);
         } catch (err) {
             console.error("Upload failed:", err);

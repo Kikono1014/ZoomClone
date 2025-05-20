@@ -68,17 +68,19 @@ else
         <p>Logged in as <strong>@userName</strong></p>
         
         <div>
-            <input id="messageInput" type="text" placeholder="Public message..." />
-            <button id="sendPublicButton">Send Public</button>
+            <input id="publicMessageInput" type="text" placeholder="Public message..." />
+            <input type="file" id="publicFileInput" />
+            <button onclick="sendPublicMessage()">Send</button>
         </div>
 
         <div>
             <input id="privateMessageInput" type="text" placeholder="Private message..." />
             <input id="privateRecipientInput" type="text" placeholder="Recipient username" />
-            <button id="sendPrivateButton">Send Private</button>
+            <input type="file" id="privateFileInput" />
+            <button onclick="sendPrivateMessage()">Send</button>
         </div>
 
-        <ul id="messagesList"></ul>
+        <div id="messagesList"></div>
     </div>
 
     <script src="~/js/chat.js"></script>

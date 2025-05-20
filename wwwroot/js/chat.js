@@ -4,31 +4,10 @@ const chatConnection = new signalR.HubConnectionBuilder()
     .withUrl("/chatHub")
     .build();
 
-document.getElementById("sendPublicButton").disabled = true;
-document.getElementById("sendPrivateButton").disabled = true;
-
 chatConnection.start().then(function () {
-    document.getElementById("sendPublicButton").disabled = false;
-    document.getElementById("sendPrivateButton").disabled = false;
-    chatConnection.invoke("Register", currentUser);
+    chatConnection.invoke("Register", currentUser, roomId);
 }).catch(function (err) {
     return console.error(err.toString());
-});
-
-document.getElementById("sendPublicButton").addEventListener("click", function (event) {
-    const msg = document.getElementById("messageInput").value;
-    chatConnection.invoke("SendPublicMessage", currentUser, msg).catch(err => console.error(err.toString()));
-    document.getElementById("messageInput").value = "";
-    event.preventDefault();
-});
-
-document.getElementById("sendPrivateButton").addEventListener("click", function (event) {
-    const msg = document.getElementById("privateMessageInput").value;
-    const recipient = document.getElementById("privateRecipientInput").value;
-    chatConnection.invoke("SendPrivateMessage", currentUser, recipient, msg).catch(err => console.error(err.toString()));
-    document.getElementById("privateMessageInput").value = "";
-    document.getElementById("privateRecipientInput").value = "";
-    event.preventDefault();
 });
 
 chatConnection.on("ReceivePublic", function (sender, message) {
@@ -51,3 +30,50 @@ chatConnection.on("ReceivePrivate", function (sender, recipient, message) {
         document.getElementById("messagesList").appendChild(li);
     }
 });
+
+chatConnection.on("ReceiveFile", (user, fileName, fileId) => {
+    const list = document.getElementById('messagesList');
+    const linkHtml = `<strong>${user}</strong> sent a file: <a href="/downloadFile/${fileId}" download>${fileName}</a><br/>`;
+    list.innerHTML += linkHtml;
+});
+
+
+async function sendPublicMessage() {
+    const msgInput = document.getElementById('publicMessageInput');
+    const fileInput = document.getElementById('publicFileInput');
+    const file = fileInput.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64Data = e.target.result;
+            await chatConnection.invoke("SendPublicFile", currentUser, roomId, file.name, base64Data);
+            fileInput.value = '';
+        };
+        reader.readAsDataURL(file);
+    } else if (msgInput.value !== '') {
+        await chatConnection.invoke("SendPublicMessage", currentUser, roomId, msgInput.value);
+        msgInput.value = '';
+    }
+}
+
+async function sendPrivateMessage() {
+    const recipient = document.getElementById("privateRecipientInput").value;
+    const msgInput = document.getElementById('privateMessageInput');
+    const fileInput = document.getElementById('privateFileInput');
+    const file = fileInput.files[0];
+
+    if (currentUser === recipient) return;
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64Data = e.target.result;
+            await chatConnection.invoke("SendPrivateFile", currentUser, recipient, file.name, base64Data);
+            fileInput.value = '';
+        };
+        reader.readAsDataURL(file);
+    } else if (msgInput.value !== '') {
+        await chatConnection.invoke("SendPrivateMessage", currentUser, recipient, msgInput.value);
+        msgInput.value = '';
+    }
+}

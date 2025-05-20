@@ -20,7 +20,7 @@ public class VideoController : ControllerBase
         }
 
         // Decide where to store recordings. e.g. wwwroot/recordings or "RecordedVideos" at content root.
-        var recordingsDir = Path.Combine(Directory.GetCurrentDirectory(), "recordings");
+        var recordingsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/recordings");
         if (!Directory.Exists(recordingsDir))
         {
             Directory.CreateDirectory(recordingsDir);
@@ -36,7 +36,7 @@ public class VideoController : ControllerBase
         }
 
         // Return the path (relative or absolute) so client can notify user
-        var relativePath = Path.Combine("RecordedVideos", fileName);
+        var relativePath = Path.Combine("recordings", fileName);
         return Ok(new { path = relativePath });
     }
 }

@@ -6,7 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options => {
+    options.MaximumReceiveMessageSize = null;
+});
 
 builder.Services.AddSingleton<List<Room>>();
 
@@ -17,8 +19,6 @@ builder.Services.AddCors(options =>
                         .AllowAnyMethod()
                         .AllowAnyOrigin());
 });
-
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -43,9 +43,23 @@ app.MapControllerRoute(
 app.UseStaticFiles();
 app.MapControllers();
 
+
+app.MapGet("/downloadFile/{id}", (string id) => {
+    if (ChatHub._fileMemory.TryGetValue(id, out var entry))
+    {
+        return Results.File(entry.Content, entry.ContentType, entry.FileName);
+    }
+    return Results.NotFound();
+});
+
+
+
 app.MapHub<CallHub>("/callHub", options =>
 {
     options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
 });
+
+app.MapHub<ChatHub>("/chatHub");
+
 
 app.Run();
