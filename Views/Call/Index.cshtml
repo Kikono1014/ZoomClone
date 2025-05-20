@@ -47,3 +47,41 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
 <script src="~/js/call.js"></script>
 <script src="~/js/record.js"></script>
+
+
+
+@{
+    var userName = @ViewBag.Username as string;
+}
+<h2>Chat</h2>
+
+@if (string.IsNullOrEmpty(userName))
+{
+    <form method="post">
+        <label>Enter your name:</label>
+        <input type="text" name="UserNameInput" required />
+        <button type="submit">Join Chat</button>
+    </form>
+}
+else
+{
+    <div>
+        <p>Logged in as <strong>@userName</strong></p>
+        
+        <div>
+            <input id="messageInput" type="text" placeholder="Public message..." />
+            <button id="sendPublicButton">Send Public</button>
+        </div>
+
+        <div>
+            <input id="privateMessageInput" type="text" placeholder="Private message..." />
+            <input id="privateRecipientInput" type="text" placeholder="Recipient username" />
+            <button id="sendPrivateButton">Send Private</button>
+        </div>
+
+        <ul id="messagesList"></ul>
+    </div>
+
+    <script src="~/js/chat.js"></script>
+    <script> const currentUser = "@userName"; </script>
+}
