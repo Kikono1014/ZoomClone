@@ -6,8 +6,8 @@
 <input id="muteVideo_" value="@ViewBag.MuteVideo" hidden />
 
 
-<button class="btn btn-danger rounded" id="toggle-mic">Toggle Microphone</button>
-<button class="btn btn-danger rounded"  id="toggle-camera">Toggle Camera</button>
+<button class="btn btn-primary rounded" id="toggle-mic">Toggle Microphone</button>
+<button class="btn btn-primary rounded"  id="toggle-camera">Toggle Camera</button>
 <button class="btn btn-danger rounded"  id="share-screen">Share Screen</button>
 <div id="localContainer" class="media-container">
     <video id="localVideo" autoplay muted playsinline hidden></video>
@@ -70,14 +70,14 @@ else
         <div>
             <input id="publicMessageInput" type="text" placeholder="Public message..." />
             <input type="file" id="publicFileInput" />
-            <button onclick="sendPublicMessage()">Send</button>
+            <button class="btn btn-secondary rounded" onclick="sendPublicMessage()">Send</button>
         </div>
 
         <div>
             <input id="privateMessageInput" type="text" placeholder="Private message..." />
             <input id="privateRecipientInput" type="text" placeholder="Recipient username" />
             <input type="file" id="privateFileInput" />
-            <button onclick="sendPrivateMessage()">Send</button>
+            <button class="btn btn-secondary rounded" onclick="sendPrivateMessage()">Send</button>
         </div>
 
         <div id="messagesList"></div>
